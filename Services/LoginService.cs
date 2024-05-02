@@ -435,20 +435,20 @@ namespace GRCServices.Services
             return otpNumber;
         }
 
-        private readonly string AccountSid = "AC2ee8054f0c70099d50bd3885fc9760f5";
-        private readonly string AuthToken = "41a96a9c96c77ca8c6c3d2de40073e9b";
-        private readonly string TwilioPhoneNumber = "+19147684781";
+        //private readonly string AccountSid = "AC2ee8054f0c70099d50bd3885fc9760f5";
+        //private readonly string AuthToken = "41a96a9c96c77ca8c6c3d2de40073e9b";
+        //private readonly string TwilioPhoneNumber = "+19147684781";
 
-        public void SendSmsCode(string phoneNumber, int code)
-        {
-            //string phone = phoneNumber;
-            TwilioClient.Init(AccountSid, AuthToken);
+        //public void SendSmsCode(string phoneNumber, int code)
+        //{
+        //    //string phone = phoneNumber;
+        //    TwilioClient.Init(AccountSid, AuthToken);
 
-            MessageResource.Create(
-                body: $"Your MFA code is: {code}",
-                from: new PhoneNumber(TwilioPhoneNumber),
-                to: new PhoneNumber(phoneNumber)
-            );
-        }
+        //    MessageResource.Create(
+        //        body: $"Your MFA code is: {code}",
+        //        from: new PhoneNumber(TwilioPhoneNumber),
+        //        to: new PhoneNumber(phoneNumber)
+        //    );
+        //}
     }
 }
