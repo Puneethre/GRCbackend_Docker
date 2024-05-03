@@ -1,4 +1,4 @@
-name: Angular CI/CD Pipeline
+name: Dotnet CI/CD Pipeline
 
 on:
   push:
@@ -29,3 +29,18 @@ jobs:
           push: true
           file: ./Dockerfile
           context: .
+
+  deploy:
+    name: Deploy Dotnet Application to Docker Container
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Docker image
+        run: docker pull techoptima/dotnetdocker:latest
+
+      - name: Stop and remove existing Dotnet application container
+        run: |
+          docker stop dotnet-app-container || true
+          docker rm dotnet-app-container || true
+
+      - name: Run Dotnet application Docker container
+        run: docker run -d --name dotnet-app-container -p 8080:80 techoptima/dotnetdocker:latest
