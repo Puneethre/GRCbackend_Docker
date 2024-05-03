@@ -31,6 +31,7 @@ jobs:
           context: .
 
   deploy:
+    needs: build-and-push
     name: Deploy Dotnet Application to Docker Container
     runs-on: ubuntu-latest
     steps:
