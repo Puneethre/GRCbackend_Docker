@@ -43,4 +43,4 @@ jobs:
           docker rm dotnet-app-container || true
 
       - name: Run Dotnet application Docker container
-        run: docker run -d --name dotnet-app-container -p 8080:80 techoptima/dotnetdocker:latest
+        run: docker run -d --name dotnet -p 8080:8080 techoptima/dotnetdocker:latest
