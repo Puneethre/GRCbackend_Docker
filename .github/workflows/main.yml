@@ -1,27 +1,38 @@
-name: Docker Hub Build and Deploy
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  build-and-push-docker:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Push to Docker Hub
-        docker push techoptima/GRCbackend_Docker
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-  deploy:
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          tags: techoptima/GRCbackend_Docker:latest
+          push: true
+          file: ./Dockerfile
+          context: .
+
+  deploy-docker-container:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-and-push-docker
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -30,10 +41,33 @@ jobs:
         run: docker pull techoptima/GRCbackend_Docker:latest
 
       - name: Stop existing container
-        run: docker stop your-container-name || true
+        run: docker stop GRCbackend_Docker || true
 
       - name: Remove existing container
-        run: docker rm your-container-name || true
+        run: docker rm GRCbackend_Docker || true
 
       - name: Run new container
-        run: docker run -d --name Docker -p 8080:8080 techoptima/GRCbackend_Docker:latest
+        run: docker run -d --name GRCbackend_Docker -p 8080:8080 techoptima/GRCbackend_Docker:latest
+
+  build-and-deploy-dotnet:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build and Test
+        run: dotnet build --configuration Release
+        working-directory: ./GRCbackend_Docker
+
+      - name: Publish
+        run: dotnet publish --configuration Release --output ./publish
+        working-directory: ./GRCbackend_Docker
+
+      - name: Deploy to Docker
+        uses: docker/build-push-action@v2
+        with:
+          tags: techoptima/dotnetdocker:latest
+          push: true
+          file: ./GRCbackend_Docker/Dockerfile
+          context: ./GRCbackend_Docker
