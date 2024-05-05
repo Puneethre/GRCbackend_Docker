@@ -1,63 +1,41 @@
-name: Dotnet CI/CD Pipeline
+name: Docker Hub Build and Deploy
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
+    - name: Push to Docker Hub
+      run: |
+        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        docker push techoptima/GRCbackend_Docker
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          tags: techoptima/dotnetdocker:latest
-          push: true
-          file: ./Dockerfile
-          context: .
-
-  deploy:
-    needs: build-and-push
-    name: Deploy Dotnet Application to Docker Container
-    runs-on: ubuntu-latest
-    steps:
       - name: Pull Docker image
-        run: docker pull techoptima/dotnetdocker:latest
+        run: docker pull techoptima/GRCbackend_Docker:latest
 
-      - name: Stop and remove existing Dotnet application container
-        run: |
-          docker stop dotnet-app-container || true
-          docker rm dotnet-app-container || true
+      - name: Stop existing container
+        run: docker stop your-container-name || true
 
-      - name: Run Dotnet application Docker container
-        run: docker run -d --name dotnet -p 8080:8080 techoptima/dotnetdocker:latest
+      - name: Remove existing container
+        run: docker rm your-container-name || true
 
-  deploy-to-desktop:
-    needs: deploy
-    name: Deploy Dotnet Application to Docker Desktop
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pull Docker image from Docker Hub
-        run: docker pull techoptima/dotnetdocker:latest
-
-      - name: Stop and remove existing Dotnet application container on Docker Desktop
-        run: |
-          docker stop dotnet-app-desktop-container || true
-          docker rm dotnet-app-desktop-container || true
-
-      - name: Run Dotnet application Docker container on Docker Desktop
-        run: docker run -d --name dotnet-app-desktop-container -p 8080:8080 techoptima/dotnetdocker:latest
+      - name: Run new container
+        run: docker run -d --name Docker -p 8080:8080 techoptima/GRCbackend_Docker:latest
