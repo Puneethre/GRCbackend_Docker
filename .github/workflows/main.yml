@@ -49,7 +49,7 @@ jobs:
   deploy-to-desktop:
     needs: deploy
     name: Deploy Dotnet Application to Docker Desktop
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Pull Docker image from Docker Hub
         run: docker pull techoptima/dotnetdocker:latest
