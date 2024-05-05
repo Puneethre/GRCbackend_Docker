@@ -25,9 +25,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          tags: techoptima/GRCbackend_Docker:latest
+          tags: techoptima/grcbackenddocker:latest   # Adjusted repository name to lowercase
           push: true
-          file: ./Dockerfile
+          file: ./grcbackenddocker/Dockerfile        # Adjusted directory name to grcbackenddocker
           context: .
 
   deploy-docker-container:
@@ -38,16 +38,16 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Pull Docker image
-        run: docker pull techoptima/GRCbackend_Docker:latest
+        run: docker pull techoptima/grcbackenddocker:latest
 
       - name: Stop existing container
-        run: docker stop GRCbackend_Docker || true
+        run: docker stop grcbackenddocker || true
 
       - name: Remove existing container
-        run: docker rm GRCbackend_Docker || true
+        run: docker rm grcbackenddocker || true
 
       - name: Run new container
-        run: docker run -d --name GRCbackend_Docker -p 8080:8080 techoptima/GRCbackend_Docker:latest
+        run: docker run -d --name grcbackenddocker -p 8080:8080 techoptima/grcbackenddocker:latest
 
   build-and-deploy-dotnet:
     runs-on: ubuntu-latest
@@ -58,16 +58,16 @@ jobs:
 
       - name: Build and Test
         run: dotnet build --configuration Release
-        working-directory: ./GRCbackend_Docker
+        working-directory: ./grcbackenddocker     # Adjusted directory name to grcbackenddocker
 
       - name: Publish
         run: dotnet publish --configuration Release --output ./publish
-        working-directory: ./GRCbackend_Docker
+        working-directory: ./grcbackenddocker     # Adjusted directory name to grcbackenddocker
 
       - name: Deploy to Docker
         uses: docker/build-push-action@v2
         with:
           tags: techoptima/dotnetdocker:latest
           push: true
-          file: ./GRCbackend_Docker/Dockerfile
-          context: ./GRCbackend_Docker
+          file: ./grcbackenddocker/Dockerfile     # Adjusted directory name to grcbackenddocker
+          context: ./grcbackenddocker             # Adjusted directory name to grcbackenddocker
