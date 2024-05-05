@@ -57,7 +57,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build and Test
-        run: dotnet build --configuration Release --project .
+        run: dotnet build --configuration Release
         working-directory: .  # Assuming .NET project files are in the root directory
 
       - name: Publish
