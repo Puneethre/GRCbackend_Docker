@@ -9,15 +9,12 @@ on:
       - main
 
 jobs:
-
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Build Docker image
-        run: docker build -t techoptima/dotnetdocker:latest .
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
@@ -25,20 +22,19 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker image
-        run: docker push techoptima/dotnetdocker:latest
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          tags: techoptima/dotnetdocker:latest
+          push: true
+          file: ./Dockerfile
+          context: .
 
   deploy:
     needs: build-and-push
     name: Deploy Dotnet Application to Docker Container
     runs-on: ubuntu-latest
     steps:
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Pull Docker image
         run: docker pull techoptima/dotnetdocker:latest
 
@@ -48,4 +44,20 @@ jobs:
           docker rm dotnet-app-container || true
 
       - name: Run Dotnet application Docker container
-        run: docker run -d --name dotnet-app-container -p 8080:8080 techoptima/dotnetdocker:latest
+        run: docker run -d --name dotnet -p 8080:8080 techoptima/dotnetdocker:latest
+
+  deploy-to-desktop:
+    needs: deploy
+    name: Deploy Dotnet Application to Docker Desktop
+    runs-on: self-hosted
+    steps:
+      - name: Pull Docker image from Docker Hub
+        run: docker pull techoptima/dotnetdocker:latest
+
+      - name: Stop and remove existing Dotnet application container on Docker Desktop
+        run: |
+          docker stop dotnet-app-desktop-container || true
+          docker rm dotnet-app-desktop-container || true
+
+      - name: Run Dotnet application Docker container on Docker Desktop
+        run: docker run -d --name dotnet-app-desktop-container -p 8080:8080 techoptima/dotnetdocker:latest
