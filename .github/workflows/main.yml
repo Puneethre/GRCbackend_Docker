@@ -27,8 +27,8 @@ jobs:
         with:
           tags: techoptima/grcbackenddocker:latest   # Adjusted repository name to lowercase
           push: true
-          file: ./grcbackenddocker/Dockerfile        # Adjusted directory name to grcbackenddocker
-          context: .
+          file: ./Dockerfile        # Adjusted path to Dockerfile
+          context: .               # Adjusted path to context directory
 
   deploy-docker-container:
     runs-on: ubuntu-latest
@@ -58,16 +58,16 @@ jobs:
 
       - name: Build and Test
         run: dotnet build --configuration Release
-        working-directory: ./grcbackenddocker     # Adjusted directory name to grcbackenddocker
+        working-directory: .     # Assuming .NET project files are in the root directory
 
       - name: Publish
         run: dotnet publish --configuration Release --output ./publish
-        working-directory: ./grcbackenddocker     # Adjusted directory name to grcbackenddocker
+        working-directory: .     # Assuming .NET project files are in the root directory
 
       - name: Deploy to Docker
         uses: docker/build-push-action@v2
         with:
           tags: techoptima/dotnetdocker:latest
           push: true
-          file: ./grcbackenddocker/Dockerfile     # Adjusted directory name to grcbackenddocker
-          context: ./grcbackenddocker             # Adjusted directory name to grcbackenddocker
+          file: ./Dockerfile     # Adjusted path to Dockerfile
+          context: .             # Adjusted path to context directory
