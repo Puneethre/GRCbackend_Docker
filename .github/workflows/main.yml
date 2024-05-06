@@ -1,4 +1,4 @@
-name: Deploy to Docker Container
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,52 +6,46 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-push-docker:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '8.x'
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build the project
-      run: dotnet build
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          tags: techoptima/dotnetdemo:latest
+          push: true
+          file: ./Dockerfile
+          context: .
 
-    - name: Build Docker image
-      run: docker build -t dotnetdemo .
+      - name: Deploy to local server
+        run: |
+          # Assuming you have Docker installed on your local server
+          docker pull techoptima/dotnetdemo:latest
+          docker stop dotnet-local || true
+          docker rm dotnet-local || true
+          docker run -d -p 8080:80 --name dotnet-local techoptima/dotnetdemo:latest
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push Docker image to Docker Desktop
+        run: |
+          # Assuming you have Docker Desktop installed
+          docker pull techoptima/dotnetdemo:latest
+          docker stop dotnet-desktop || true
+          docker rm dotnet-desktop || true
+          docker run -d -p 8080:80 --name dotnet-desktop techoptima/dotnetdemo:latest
 
-    - name: Push Docker image to Docker Hub
-      run: docker push dotnetdemo
-
-    - name: Deploy to local server
-      run: |
-        # Assuming you have Docker installed on your local server
-        docker pull dotnetdemo
-        docker stop your-container-name || true
-        docker rm your-container-name || true
-        docker run -d -p 8080:8080 --name demo dotnetdemo
-
-    - name: Push Docker image to Docker Desktop
-      run: |
-        # Assuming you have Docker Desktop installed
-        docker pull dotnetdemo
-        docker stop your-container-name || true
-        docker rm your-container-name || true
-        docker run -d -p 8080:8080 --name demo dotnetdemo
-
-    - name: Push Docker container to GitHub Container Registry
-      run: |
-        docker pull your-image-name
-        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        docker tag your-image-name ghcr.io/your-username/your-image-name:latest
-        docker push ghcr.io/techoptima/dotnetdemo:latest
+      - name: Push Docker container to GitHub Container Registry
+        run: |
+          docker pull techoptima/dotnetdemo:latest
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker tag techoptima/dotnetdemo:latest ghcr.io/techoptima/dotnetdemo:latest
+          docker push ghcr.io/techoptima/dotnetdemo:latest
