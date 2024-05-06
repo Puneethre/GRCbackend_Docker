@@ -27,19 +27,10 @@ jobs:
           file: ./Dockerfile
           context: .
 
-      - name: Deploy to local server
-        run: |
-          # Assuming you have Docker installed on your local server
-          docker pull techoptima/dotnetdemo:latest
-          docker stop dotnet-local || true
-          docker rm dotnet-local || true
-          docker run -d -p 8888:80 --name dotnet-desktop techoptima/dotnetdemo:latest
-
       - name: Push Docker image to Docker Desktop
         run: |
           # Assuming you have Docker Desktop installed
           docker pull techoptima/dotnetdemo:latest
           docker stop dotnet-desktop || true
           docker rm dotnet-desktop || true
-          docker run -d -p 8888:80 --name dotnet-desktop techoptima/dotnetdemo:latest
-
+          docker run -d -p 8889:8080 --name dotnet-desktop techoptima/dotnetdemo:latest
