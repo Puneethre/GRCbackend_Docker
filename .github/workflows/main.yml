@@ -33,7 +33,7 @@ jobs:
           docker pull techoptima/dotnetdemo:latest
           docker stop dotnet-local || true
           docker rm dotnet-local || true
-          docker run -d -p 8080:8080 --name dotnet-local techoptima/dotnetdemo:latest
+          docker run -d -p 8888:80 --name dotnet-desktop techoptima/dotnetdemo:latest
 
       - name: Push Docker image to Docker Desktop
         run: |
@@ -41,4 +41,5 @@ jobs:
           docker pull techoptima/dotnetdemo:latest
           docker stop dotnet-desktop || true
           docker rm dotnet-desktop || true
-          docker run -d -p 8080:8080 --name dotnet-desktop techoptima/dotnetdemo:latest
+          docker run -d -p 8888:80 --name dotnet-desktop techoptima/dotnetdemo:latest
+
