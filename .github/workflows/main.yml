@@ -33,8 +33,7 @@ jobs:
           docker pull techoptima/dotnetdemo:latest
           docker stop dotnet-local || true
           docker rm dotnet-local || true
-          docker run -d -p 8888:8080 --name dotnet-desktop techoptima/dotnetdemo:latest
-
+          docker run -d -p 8080:8080 --name dotnet-local techoptima/dotnetdemo:latest
 
       - name: Push Docker image to Docker Desktop
         run: |
@@ -42,12 +41,4 @@ jobs:
           docker pull techoptima/dotnetdemo:latest
           docker stop dotnet-desktop || true
           docker rm dotnet-desktop || true
-          docker run -d -p 8888:8080 --name dotnet-desktop techoptima/dotnetdemo:latest
-
-
-      - name: Push Docker container to GitHub Container Registry
-        run: |
-          docker pull techoptima/dotnetdemo:latest
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker tag techoptima/dotnetdemo:latest ghcr.io/techoptima/dotnetdemo:latest
-          docker push ghcr.io/techoptima/dotnetdemo:latest
+          docker run -d -p 8080:8080 --name dotnet-desktop techoptima/dotnetdemo:latest
