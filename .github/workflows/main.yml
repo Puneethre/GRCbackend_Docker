@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   build-and-push-docker:
@@ -25,49 +22,20 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          tags: techoptima/grcbackenddocker:latest   # Adjusted repository name to lowercase
+          tags: techoptima/docker:latest
           push: true
-          file: ./Dockerfile        # Adjusted path to Dockerfile
-          context: .               # Adjusted path to context directory
+          file: ./Dockerfile
+          context: .
 
-  deploy-docker-container:
+  deploy-to-local:
     runs-on: ubuntu-latest
-    needs: build-and-push-docker
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Pull Docker image
-        run: docker pull techoptima/grcbackenddocker:latest
+        run: docker pull techoptima/docker:latest
 
-      - name: Stop existing container
-        run: docker stop grcbackenddocker || true
-
-      - name: Remove existing container
-        run: docker rm grcbackenddocker || true
-
-      - name: Run new container
-        run: docker run -d --name grcbackenddocker -p 8080:8080 techoptima/grcbackenddocker:latest
-
-  build-and-deploy-dotnet:    # Fix indentation here
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Build and Test
-        run: dotnet build --configuration Release ./src/GRCServicesSolution.sln
-        working-directory: .  # Assuming .NET project files are in the root directory
-
-      - name: Publish
-        run: dotnet publish --configuration Release --output ./publish
-        working-directory: .  # Assuming .NET project files are in the root directory
-
-      - name: Deploy to Docker
-        uses: docker/build-push-action@v2
-        with:
-          tags: techoptima/dotnetdocker:latest
-          push: true
-          file: ./Dockerfile  # Adjusted path to Dockerfile
-          context: .          # Adjusted path to context directory
+      - name: Run Docker container
+        run: docker run -d -p 8080:8080 techoptima/docker:latest
