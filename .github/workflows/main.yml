@@ -27,10 +27,15 @@ jobs:
           file: ./Dockerfile
           context: .
 
+      - name: Open Docker Desktop
+        run: |
+          # Assuming Docker Desktop is installed and available in the PATH environment variable
+          & "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+
       - name: Push Docker image to Docker Desktop
         run: |
           # Assuming you have Docker Desktop installed
           docker pull techoptima/dotnetdemo:latest
           docker stop dotnet-desktop || true
           docker rm dotnet-desktop || true
-          docker run -d -p 8889:8080 --name dotnet-desktop techoptima/dotnetdemo:latest
+          docker run -d -p 8889:80 --name dotnet-desktop techoptima/dotnetdemo:latest
